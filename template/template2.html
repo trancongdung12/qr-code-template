@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Template1</title>
+  </head>
+
+  <body>
+    <style>
+      .container {
+        margin: auto;
+      }
+      #container-card {
+        display: flex;
+      }
+      .card {
+        background-image: url("https://i.pinimg.com/736x/aa/6c/4a/aa6c4ae88d3ff228a6043e2c21e323bc.jpg");
+        width: 280px;
+        border-radius: 20px;
+        margin-left: 20px;
+        padding: 12px;
+        text-align: center;
+      }
+      .title {
+        font-size: 10px;
+        margin-bottom: 4px;
+        color: #304c85;
+      }
+      .qr-code {
+        width: 200px;
+        height: 200px;
+      }
+      .qr-code-template {
+        width: 300px;
+        height: 400px;
+      }
+      .logo-vietqr {
+        width: 280px;
+        margin-top: -18px;
+      }
+      .card-item {
+        background-color: white;
+        border-radius: 10px;
+      }
+      .layout-qr-code {
+        border: 1px solid #304c85;
+        width: 200px;
+        height: 200px;
+        margin: auto;
+        margin-top: -18px;
+      }
+      .bank-img {
+        width: 100px;
+      }
+      .layout-title {
+        margin-top: -10px;
+        padding-bottom: 12px;
+      }
+    </style>
+    <div class="container">
+      <div class="layout-card">
+        <div id="container-card"></div>
+      </div>
+    </div>
+    <script>
+      const userAction = async () => {
+        const payload = JSON.stringify({
+          u: 3,
+          p: 1,
+          s: "1688396255218",
+          payload: {
+            id: 12,
+            invoiceId: 3,
+          },
+        });
+        const response = await fetch(
+          "https://tt7w9oaycl.execute-api.ap-southeast-1.amazonaws.com/dev/incognito/utility/getBankAccountInfo",
+          {
+            method: "POST",
+            body: payload,
+            headers: {
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const data = await response.json();
+
+        document.getElementById("container-card").innerHTML = data?.items
+          .map(
+            (bank) =>
+              `<div class="card">
+          <div class="card-item">
+            <img
+              class="logo-vietqr"
+              src="https://vietqr.net/img/VietQR.46a78cbb.png"
+            />
+            <div class="layout-qr-code">
+              <img
+                class="qr-code"
+                alt="qr-code "
+                src="data:image/png;base64,${bank?.qrCode}"
+              />
+            </div>
+            <img
+              class="bank-img"
+              src="https://vietqr.net/portal-service/resources/icons/ABB.png"
+            />
+            <div class="layout-title">
+              <div class="title">Số tiền: ${formatCurrency(bank?.amount)}</div>
+              <div class="title">Nội dung CK: ${bank?.content}</div>
+              <div class="title">Tên chủ CK: ${bank?.accountName}</div>
+              <div class="title"><b>Số TK: ${bank?.accountNumber}</b></div>
+            </div>
+          </div>
+        </div>`
+          )
+          .join("");
+      };
+      userAction();
+
+      const formatCurrency = (num, currency = "VND") => {
+        return `${(num || 0)
+          .toString()
+          .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1.")} ${currency}`;
+      };
+    </script>
+  </body>
+</html>
